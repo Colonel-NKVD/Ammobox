@@ -1,5 +1,25 @@
 using Rocket.API;
 using System.Collections.Generic;
+using System.Xml.Serialization;
+
+// Класс для хранения данных о стоимости магазина (легко сериализуется в XML)
+public class MagazineCost
+{
+    [XmlAttribute("Id")]
+    public ushort Id;
+
+    [XmlAttribute("Cost")]
+    public int Cost;
+
+    // Пустой конструктор обязателен для XML-сериализатора
+    public MagazineCost() { }
+
+    public MagazineCost(ushort id, int cost)
+    {
+        Id = id;
+        Cost = cost;
+    }
+}
 
 public class AmmoBoxConfig : IRocketPluginConfiguration
 {
@@ -7,8 +27,9 @@ public class AmmoBoxConfig : IRocketPluginConfiguration
 
     public ushort AmmoBoxId;
     public int AmmoBoxMaxResources;
-    // Словарь: ID магазина -> Стоимость пополнения
-    public Dictionary<ushort, int> MagazineCosts;
+    
+    // Заменяем Dictionary на List
+    public List<MagazineCost> MagazineCosts;
 
     public ushort MedBoxId;
     public int MedBoxMaxResources;
@@ -22,12 +43,12 @@ public class AmmoBoxConfig : IRocketPluginConfiguration
         AmmoBoxId = 1234;
         AmmoBoxMaxResources = 100; 
 
-        // Примеры цен по вашему запросу
-        MagazineCosts = new Dictionary<ushort, int>
+        // Инициализируем список
+        MagazineCosts = new List<MagazineCost>
         {
-            { 1394, 5 }, // Допустим, пулеметная лента
-            { 123, 2 },  // Допустим, магазин Шмайсера
-            { 17, 1 }    // Обычный магазин
+            new MagazineCost(1394, 5), // Пулеметная лента
+            new MagazineCost(123, 2),  // Магазин Шмайсера
+            new MagazineCost(17, 1)    // Обычный магазин
         };
 
         MedBoxId = 1235;
