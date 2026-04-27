@@ -51,7 +51,8 @@ public class CommandRefill : IRocketCommand
                         {
                             jar.item.state = asset.getState(EItemOrigin.ADMIN);
                             jar.item.amount = asset.amount;
-                            player.Player.inventory.sendUpdateState(page, jar.x, jar.y, jar.item.state);
+                            
+                            // Синхронизируем ТОЛЬКО количество патронов (state не отправляем, он обновится сам)
                             player.Player.inventory.sendUpdateAmount(page, jar.x, jar.y, jar.item.amount);
 
                             currentResources -= cost;
