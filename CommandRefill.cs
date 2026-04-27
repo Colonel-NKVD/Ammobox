@@ -42,9 +42,14 @@ public class CommandRefill : IRocketCommand
             {
                 ItemJar jar = region.getItem(i);
                 
-                if (config.MagazineCosts.TryGetValue(jar.item.id, out int cost))
+                // ПАТЧ: Вместо TryGetValue используем поиск в списке MagazineCosts
+                MagazineCost magData = config.MagazineCosts.Find(m => m.Id == jar.item.id);
+
+                if (magData != null)
                 {
+                    int cost = magData.Cost;
                     ItemAsset asset = (ItemAsset)Assets.find(EAssetType.ITEM, jar.item.id);
+                    
                     if (asset != null && jar.item.amount < asset.amount)
                     {
                         if (currentResources >= cost)
@@ -52,7 +57,7 @@ public class CommandRefill : IRocketCommand
                             jar.item.state = asset.getState(EItemOrigin.ADMIN);
                             jar.item.amount = asset.amount;
                             
-                            // Синхронизируем ТОЛЬКО количество патронов (state не отправляем, он обновится сам)
+                            // Синхронизируем количество патронов
                             player.Player.inventory.sendUpdateAmount(page, jar.x, jar.y, jar.item.amount);
 
                             currentResources -= cost;
