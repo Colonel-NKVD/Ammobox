@@ -8,14 +8,12 @@ public class AmmoBoxPlugin : RocketPlugin<AmmoBoxConfig>
 {
     public static AmmoBoxPlugin Instance;
     
-    // Храним оставшийся ресурс для каждого активного ящика. 
-    // Ключ - Transform баррикады, Значение - оставшийся ресурс
     public Dictionary<Transform, int> BoxResources = new Dictionary<Transform, int>();
 
     protected override void Load()
     {
         Instance = this;
-        Logger.Log("AmmoBox загружен.");
+        Logger.Log("AmmoBox загружен. Готов к позиционной войне!");
     }
 
     protected override void Unload()
@@ -24,18 +22,36 @@ public class AmmoBoxPlugin : RocketPlugin<AmmoBoxConfig>
         Instance = null;
     }
 
-    // Метод для получения ближайшего ящика нужного типа
     public BarricadeDrop GetNearestBox(Player player, ushort boxId, float radius)
     {
         BarricadeDrop nearestDrop = null;
         float minDistanceSqr = radius * radius;
 
-        List<BarricadeRegion> regions = new List<BarricadeRegion>();
-        BarricadeManager.getRegionsInRadius(player.transform.position, radius, regions);
-
-        foreach (var region in regions)
+        // Надежный глобальный поиск по всем стационарным регионам
+        for (byte x = 0; x < Regions.WORLD_SIZE; x++)
         {
-            foreach (var drop in region.drops)
+            for (byte y = 0; y < Regions.WORLD_SIZE; y++)
+            {
+                BarricadeRegion region = BarricadeManager.regions[x, y];
+                foreach (BarricadeDrop drop in region.drops)
+                {
+                    if (drop.asset.id == boxId)
+                    {
+                        float distSqr = (drop.model.position - player.transform.position).sqrMagnitude;
+                        if (distSqr <= minDistanceSqr)
+                        {
+                            minDistanceSqr = distSqr;
+                            nearestDrop = drop;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Поиск по регионам транспорта (если ящик закреплен на технике)
+        foreach (var vRegion in BarricadeManager.vehicleRegions)
+        {
+            foreach (BarricadeDrop drop in vRegion.drops)
             {
                 if (drop.asset.id == boxId)
                 {
@@ -48,15 +64,18 @@ public class AmmoBoxPlugin : RocketPlugin<AmmoBoxConfig>
                 }
             }
         }
+
         return nearestDrop;
     }
 
-    // Уничтожение ящика, когда ресурс иссяк
     public void DestroyBox(BarricadeDrop drop)
     {
+        // Игнорируем варнинги компилятора об устаревшем API
+        #pragma warning disable CS0618
         if (BarricadeManager.tryGetInfo(drop.model, out byte x, out byte y, out ushort plant, out ushort index, out BarricadeRegion region))
         {
             BarricadeManager.destroyBarricade(region, x, y, plant, index);
         }
+        #pragma warning restore CS0618
     }
 }
