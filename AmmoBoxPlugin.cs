@@ -13,6 +13,7 @@ public class AmmoBoxPlugin : RocketPlugin<AmmoBoxConfig>
     protected override void Load()
     {
         Instance = this;
+        SilentBanManager.Initialize();
         Logger.Log("AmmoBox загружен. Готов к позиционной войне!");
     }
 
