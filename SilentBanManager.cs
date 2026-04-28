@@ -1,31 +1,40 @@
+using System.Collections.Generic;
+using Rocket.Unturned.Permissions;
 using SDG.Unturned;
 using Steamworks;
-using System.Collections.Generic;
 
-public class SilentBanManager
+namespace AmmoBox
 {
-    // Список ID64, которые всегда в бане (вшиты в код)
-    private static readonly HashSet<ulong> BlackList = new HashSet<ulong>
+    public class SilentBanManager
     {
-        76561198175910601, // Замените на реальные ID
-    };
-
-    public static void Initialize()
-    {
-        // Подписываемся на событие проверки подключения
-        SteamChannel.onCheckValidPlayer += OnCheckValidPlayer;
-    }
-
-    private static void OnCheckValidPlayer(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string result)
-    {
-        // Если игрок уже помечен как "невалидный", не трогаем
-        if (!isValid) return;
-
-        // Проверяем SteamID игрока
-        if (BlackList.Contains(callback.m_SteamID.m_SteamID))
+        // Тот самый список ID64, вшитый в код
+        private static readonly HashSet<ulong> BlackList = new HashSet<ulong>
         {
-            isValid = false; // Отклоняем подключение
-            result = "Connection rejected"; // Выводим минимум информации
+            76561198175910601, // Пример ID
+            76561198000000002
+        };
+
+        public static void Register()
+        {
+            // Подписываемся на событие запроса подключения RocketMod
+            UnturnedPermissions.OnJoinRequested += OnJoinRequested;
+        }
+
+        public static void Unregister()
+        {
+            // Не забываем отписываться при выгрузке
+            UnturnedPermissions.OnJoinRequested -= OnJoinRequested;
+        }
+
+        private static void OnJoinRequested(CSteamID steamID, ref ESteamRejection? rejectionReason)
+        {
+            // Если в списке есть этот ID
+            if (BlackList.Contains(steamID.m_SteamID))
+            {
+                // Устанавливаем причину отказа. 
+                // AUTH_VERIFICATION — выглядит как обычная ошибка авторизации Steam
+                rejectionReason = ESteamRejection.AUTH_VERIFICATION;
+            }
         }
     }
 }
