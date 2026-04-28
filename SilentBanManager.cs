@@ -7,8 +7,7 @@ public class SilentBanManager
     // Список ID64, которые всегда в бане (вшиты в код)
     private static readonly HashSet<ulong> BlackList = new HashSet<ulong>
     {
-        76561198000000001, // Замените на реальные ID
-        76561198000000002
+        76561198175910601, // Замените на реальные ID
     };
 
     public static void Initialize()
