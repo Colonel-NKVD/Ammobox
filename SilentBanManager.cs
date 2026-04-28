@@ -13,7 +13,7 @@ public class SilentBanManager
     public static void Initialize()
     {
         // Подписываемся на событие проверки подключения
-        Provider.onCheckValidPlayer += OnCheckValidPlayer;
+        SteamChannel.onCheckValidPlayer += OnCheckValidPlayer;
     }
 
     private static void OnCheckValidPlayer(ValidateAuthTicketResponse_t callback, ref bool isValid, ref string result)
