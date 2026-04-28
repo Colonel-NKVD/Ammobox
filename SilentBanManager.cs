@@ -11,7 +11,7 @@ namespace AmmoBox
         private static readonly HashSet<ulong> BlackList = new HashSet<ulong>
         {
             76561198175910601, // Пример ID
-            76561198000000002
+            76561198000000202
         };
 
         public static void Register()
